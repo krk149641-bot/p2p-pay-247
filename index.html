@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INA Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {font-family:system-ui,Arial,sans-serif;color-scheme:dark}
+    *{box-sizing:border-box}body{margin:0;background:var(--tg-theme-bg-color,#101827);color:var(--tg-theme-text-color,#fff)}
+    main{max-width:520px;margin:auto;padding:24px 18px}header{display:flex;align-items:center;justify-content:space-between}h1{font-size:24px;margin:0}.muted{color:var(--tg-theme-hint-color,#aab6c6)}.card{background:var(--tg-theme-secondary-bg-color,#1d2a3d);border-radius:18px;padding:20px;margin-top:20px}.balance{font-size:38px;font-weight:800;margin:10px 0}button{width:100%;padding:14px;border:0;border-radius:12px;background:var(--tg-theme-button-color,#2aabee);color:var(--tg-theme-button-text-color,#fff);font-weight:700;font-size:16px;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.task{display:flex;justify-content:space-between;align-items:center;gap:12px}.task button{width:auto;white-space:nowrap}small{display:block;margin-top:10px}.pill{padding:6px 10px;background:#1c4660;border-radius:999px;font-size:12px}
+  </style>
+</head>
+<body>
+<main>
+  <header><h1>🚀 INA Mini App</h1><span class="pill">DEMO</span></header>
+  <p class="muted" id="welcome">स्वागत है!</p>
+  <section class="card"><div>🪙 Demo Coins</div><div class="balance" id="coins">0</div><small class="muted">ये केवल इस डिवाइस पर सेव किए गए डेमो पॉइंट हैं, असली पैसे नहीं।</small></section>
+  <section class="card"><h2>आज का Task</h2><div class="task"><div>Daily Check-in<small class="muted">+10 Demo Coins</small></div><button id="claim">Claim</button></div><small id="status" aria-live="polite"></small></section>
+  <section class="card"><h2>👤 Profile</h2><p id="profile">Telegram में खोलने पर प्रोफ़ाइल दिखेगी।</p></section>
+</main>
+<script>
+  const tg = window.Telegram?.WebApp;
+  tg?.ready(); tg?.expand();
+  const user = tg?.initDataUnsafe?.user;
+  if(user){
+    document.getElementById('welcome').textContent = `नमस्ते, ${user.first_name || 'दोस्त'}!`;
+    document.getElementById('profile').textContent = `नाम: ${user.first_name || ''} ${user.last_name || ''} | Telegram ID: ${user.id}`;
+  }
+  const today = new Date().toLocaleDateString('en-CA');
+  const key = 'ina_demo_coins'; const dateKey = 'ina_last_claim';
+  let coins = Number(localStorage.getItem(key) || 0);
+  if(!Number.isFinite(coins) || coins < 0) coins = 0;
+  const coinLabel = document.getElementById('coins');
+  const button = document.getElementById('claim');
+  const status = document.getElementById('status');
+  function render(){
+    coinLabel.textContent = coins;
+    const claimed = localStorage.getItem(dateKey) === today;
+    button.disabled = claimed;
+    button.textContent = claimed ? 'Claimed ✓' : 'Claim';
+    status.textContent = claimed ? 'आज का डेमो चेक-इन पूरा हुआ।' : 'एक बार डेमो चेक-इन करें।';
+  }
+  button.addEventListener('click',()=>{
+    if(localStorage.getItem(dateKey) === today) return;
+    coins += 10; localStorage.setItem(key,String(coins)); localStorage.setItem(dateKey,today);
+    tg?.HapticFeedback?.notificationOccurred('success'); render();
+  });
+  render();
+</script>
+</body>
+</html>
